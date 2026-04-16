@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคัดกรอง DSPM อำเภอกู่แก้ว จังหวัดอุดรธานี</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 สำหรับแจ้งเตือน -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Noto Sans Thai -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Flatpickr (Thai Datepicker) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
+    <!-- SheetJS สำหรับดาวน์โหลดไฟล์ Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body { font-family: 'Noto Sans Thai', sans-serif; background-color: #f3f4f6; }
+        .hidden-section { display: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ลิงก์ API สำหรับบันทึกข้อมูลลง Google Sheets -->
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzyqrQ6pcb493EL6mLWjSooNfl6Gwjz9uM-WyB8lXH5x2kKdJSVdMpTN-y_mSPDWBRc/exec"; 
+    </script>
+
+    <!-- Navbar -->
+    <nav class="bg-blue-700 text-white shadow-md z-10 sticky top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-3 shrink-0">
+                    <i data-lucide="baby" class="w-8 h-8 hidden sm:block"></i>
+                    <span class="font-bold text-lg sm:text-xl truncate">ระบบคัดกรอง DSPM อำเภอกู่แก้ว จังหวัดอุดรธานี</span>
+                </div>
+                <!-- Menu Buttons -->
+                <div class="flex items-center space-x-2 sm:space-x-3 overflow-x-auto no-scrollbar pl-2 py-1">
+                    <button onclick="navigate('dashboard')" id="nav-dashboard" class="px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-200 flex items-center shadow-sm">
+                        <i data-lucide="home" class="w-4 h-4 mr-1 hidden sm:block"></i> หน้าหลัก
+                    </button>
+                    <button onclick="navigate('form')" id="nav-form" class="px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-200 flex items-center shadow-sm">
+                        <i data-lucide="edit" class="w-4 h-4 mr-1 hidden sm:block"></i> บันทึกข้อมูล
+                    </button>
+                    <button onclick="navigate('summary')" id="nav-summary" class="px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-200 flex items-center shadow-sm">
+                        <i data-lucide="lock" class="w-4 h-4 mr-1 hidden sm:block"></i> รายงาน (เจ้าหน้าที่)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- ==================== 1. DASHBOARD VIEW (หน้าแรก) ==================== -->
+        <div id="view-dashboard" class="space-y-8">
+            
+            <!-- Hero Section -->
+            <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl shadow-lg p-8 sm:p-10 text-white relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold tracking-wider mb-4 border border-white/30">
+                        Version 2.0
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 leading-tight">ระบบบันทึกและคัดกรอง DSPM</h1>
+                    <p class="text-blue-100 text-lg sm:text-xl max-w-2xl font-medium">อำเภอกู่แก้ว จังหวัดอุดรธานี</p>
+                </div>
+                <i data-lucide="baby" class="absolute -right-10 -bottom-10 w-64 h-64 text-white opacity-10 transform -rotate-12"></i>
+            </div>
+            
+            <!-- Action Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                <!-- Card 1 -->
+                <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl p-8 border border-gray-100 flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-2 cursor-pointer group" onclick="navigate('form')">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white mb-6 shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="file-edit" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">เพิ่มข้อมูลคัดกรอง</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">เข้าสู่แบบฟอร์มเพื่อบันทึกข้อมูลการประเมิน DSPM ของเด็กรายบุคคล</p>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="bg-white rounded-2xl shadow-sm p-8 border border-gray-100 flex flex-col items-center text-center relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-100 to-rose-100 rounded-bl-full -z-10 transition-transform duration-500 group-hover:scale-110"></div>
+                    <div class="w-20 h-20 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center text-white mb-6 shadow-md">
+                        <i data-lucide="cloud-lightning" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">จัดเก็บระบบคลาวด์</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">ข้อมูลทั้งหมดถูกเชื่อมโยงและบันทึกลง Google Sheet อย่างปลอดภัยอัตโนมัติ</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl p-8 border border-gray-100 flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-2 cursor-pointer group" onclick="navigate('summary')">
+                    <div class="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white mb-6 shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="pie-chart" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">รายงานสรุปผล</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">สำหรับเจ้าหน้าที่ เพื่อดูสถิติ ค้นหาประวัติย้อนหลัง และส่งออกเป็นไฟล์ Excel</p>
+                </div>
+            </div>
+            
+            <!-- Quick Guide -->
+            <div class="bg-white rounded-2xl shadow-sm p-8 sm:p-10 border border-gray-100 mt-4">
+                <div class="text-center mb-10">
+                    <h3 class="text-2xl font-bold text-gray-800 inline-flex items-center justify-center">
+                        <i data-lucide="map" class="w-7 h-7 mr-3 text-indigo-500"></i> 3 ขั้นตอนง่ายๆ ในการใช้งาน
+                    </h3>
+                    <div class="w-24 h-1 bg-indigo-500 mx-auto mt-4 rounded-full"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 relative">
+                    <!-- Line connecting steps (Desktop) -->
+                    <div class="hidden md:block absolute top-10 left-[16%] right-[16%] h-1 bg-gray-100 z-0 rounded-full"></div>
+                    
+                    <!-- Step 1 -->
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                        <div class="w-20 h-20 bg-white border-4 border-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-5 font-black text-3xl shadow-sm">1</div>
+                        <h4 class="font-bold text-gray-800 text-lg mb-2">กรอกข้อมูลทั่วไป</h4>
+                        <p class="text-sm text-gray-500">กรอกวันที่ประเมิน ชื่อ ที่อยู่ อายุ และข้อมูลพื้นฐานของเด็กให้ครบถ้วน</p>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                        <div class="w-20 h-20 bg-white border-4 border-fuchsia-100 text-fuchsia-600 rounded-full flex items-center justify-center mb-5 font-black text-3xl shadow-sm">2</div>
+                        <h4 class="font-bold text-gray-800 text-lg mb-2">ประเมินพัฒนาการ</h4>
+                        <p class="text-sm text-gray-500">เลือกช่วงอายุและตอบแบบประเมินรายข้อ ระบบมีคำแนะนำให้หากไม่ผ่าน</p>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                        <div class="w-20 h-20 bg-white border-4 border-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-5 font-black text-3xl shadow-sm">3</div>
+                        <h4 class="font-bold text-gray-800 text-lg mb-2">บันทึกและสรุปผล</h4>
+                        <p class="text-sm text-gray-500">เลือกผลสรุปรวม (สมวัย/สงสัยล่าช้า) ระบุการนัดหมาย และกดบันทึก</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 2. SUMMARY VIEW (รายงานสำหรับเจ้าหน้าที่) ==================== -->
+        <div id="view-summary" class="hidden-section space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 border-t-4 border-t-amber-500">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4 border-b pb-4">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-amber-600"></i>
+                        รายงานสรุปผลการคัดกรอง
+                    </h3>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                        <button onclick="fetchDataFromGoogleSheets(true)" id="btnSyncData" class="px-4 py-2 bg-blue-100 text-blue-700 font-bold rounded-md hover:bg-blue-200 transition-colors text-sm flex items-center justify-center shadow-sm">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> ซิงค์ข้อมูลล่าสุด
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full flex flex-col sm:flex-row gap-3">
+                        <div class="w-full sm:w-1/4">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">ปี พ.ศ.</label>
+                            <input type="number" id="filterYear" placeholder="พ.ศ." onchange="applyFiltersAndRender()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 bg-white text-sm">
+                        </div>
+                        <div class="w-full sm:w-1/3">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">เดือน</label>
+                            <select id="filterMonth" onchange="applyFiltersAndRender()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 bg-white text-sm">
+                                <option value="all">ทุกเดือน</option>
+                                <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option>
+                                <option value="04">เมษายน</option><option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option>
+                                <option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option><option value="09">กันยายน</option>
+                                <option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+                            </select>
+                        </div>
+                        <div class="w-full sm:w-5/12">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">รพ.สต.</label>
+                            <select id="filterHospital" onchange="applyFiltersAndRender()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 bg-white text-sm">
+                                <option value="all">ทุก รพ.สต.</option>
+                                <option value="รพ.สต.บ้านจีต">รพ.สต.บ้านจีต</option><option value="รพ.สต.โนนทองอินทร์">รพ.สต.โนนทองอินทร์</option>
+                                <option value="รพ.สต.ค้อใหญ่">รพ.สต.ค้อใหญ่</option><option value="รพ.สต.คอนสาย">รพ.สต.คอนสาย</option>
+                                <option value="รพ.สต.ซำป่ารัง">รพ.สต.ซำป่ารัง</option><option value="รพ.กู่แก้ว">รพ.กู่แก้ว</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center shadow-sm relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-5"><i data-lucide="users" class="w-32 h-32"></i></div>
+                        <p class="text-sm font-bold text-gray-500 mb-1 relative z-10">จำนวนที่คัดกรองทั้งหมด</p>
+                        <p class="text-4xl font-extrabold text-gray-800 relative z-10 my-2" id="statTotal">0</p>
+                        <p class="text-sm font-medium text-gray-400 relative z-10">คน</p>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-5 text-center shadow-sm relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-10 text-green-600"><i data-lucide="check-circle-2" class="w-32 h-32"></i></div>
+                        <p class="text-sm font-bold text-green-600 mb-1 relative z-10">ผลประเมิน: สมวัย</p>
+                        <p class="text-4xl font-extrabold text-green-600 relative z-10 my-2" id="statNormal">0</p>
+                        <p class="text-sm font-medium text-green-500 relative z-10">คน</p>
+                    </div>
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-5 text-center shadow-sm relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-10 text-red-600"><i data-lucide="alert-triangle" class="w-32 h-32"></i></div>
+                        <p class="text-sm font-bold text-red-600 mb-1 relative z-10">ผลประเมิน: สงสัยล่าช้า</p>
+                        <p class="text-4xl font-extrabold text-red-600 relative z-10 my-2" id="statDelay">0</p>
+                        <p class="text-sm font-medium text-red-500 relative z-10">คน</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-gray-800">รายการข้อมูล</h4>
+                        <button onclick="exportToExcel()" class="text-sm text-green-600 hover:text-green-700 font-medium flex items-center bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded border border-green-200 transition-colors">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i> ดาวน์โหลด Excel
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">วันที่บันทึกระบบ</th>
+                                    <th scope="col" class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">วันที่ประเมิน</th>
+                                    <th scope="col" class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">ชื่อ-สกุล เด็ก</th>
+                                    <th scope="col" class="px-6 py-3 text-center font-bold text-gray-500 uppercase tracking-wider">ช่วงอายุ</th>
+                                    <th scope="col" class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">รพ.สต.</th>
+                                    <th scope="col" class="px-6 py-3 text-center font-bold text-gray-500 uppercase tracking-wider">ผลประเมิน</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                        <i data-lucide="table-properties" class="w-12 h-12 text-gray-300 mx-auto mb-3"></i>
+                                        <p class="font-medium">กดปุ่ม "ซิงค์ข้อมูลล่าสุด" เพื่อดึงข้อมูล</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 3. FORM VIEW (หน้าบันทึกข้อมูล) ==================== -->
+        <div id="view-form" class="hidden-section space-y-6">
+            <form id="dspmForm" class="space-y-6">
+                <!-- ข้อมูลเด็กและที่อยู่ -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-blue-50 border-b border-gray-200 px-6 py-4"><h2 class="text-lg font-bold text-blue-800 flex items-center"><i data-lucide="user" class="w-5 h-5 mr-2"></i> ข้อมูลเด็กและที่อยู่</h2></div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="md:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6 border-b pb-6 mb-2">
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">วันที่รับการประเมิน <span class="text-red-500">*</span></label><input type="text" id="evalDateInput" name="วันที่ประเมิน" required class="w-full px-3 py-2 border rounded-md bg-white"></div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">สถานที่ประเมิน (รพ.สต.) <span class="text-red-500">*</span></label>
+                                <select name="รพ.สต." required class="w-full px-3 py-2 border rounded-md bg-white">
+                                    <option value="" disabled selected>เลือก รพ.สต.</option>
+                                    <option value="รพ.สต.บ้านจีต">รพ.สต.บ้านจีต</option><option value="รพ.สต.โนนทองอินทร์">รพ.สต.โนนทองอินทร์</option>
+                                    <option value="รพ.สต.ค้อใหญ่">รพ.สต.ค้อใหญ่</option><option value="รพ.สต.คอนสาย">รพ.สต.คอนสาย</option>
+                                    <option value="รพ.สต.ซำป่ารัง">รพ.สต.ซำป่ารัง</option><option value="รพ.กู่แก้ว">รพ.กู่แก้ว</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">คำนำหน้า <span class="text-red-500">*</span></label><select name="คำนำหน้า" required class="w-full px-3 py-2 border rounded-md bg-white"><option value="" disabled selected>เลือก</option><option value="ด.ญ.">ด.ญ.</option><option value="ด.ช.">ด.ช.</option></select></div>
+                        <div class="md:col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ <span class="text-red-500">*</span></label><input type="text" name="ชื่อ" required placeholder="กรอกชื่อ" class="w-full px-3 py-2 border rounded-md"></div>
+                        <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">นามสกุล <span class="text-red-500">*</span></label><input type="text" name="นามสกุล" required placeholder="กรอกนามสกุล" class="w-full px-3 py-2 border rounded-md"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">บ้านเลขที่ <span class="text-red-500">*</span></label><input type="text" name="บ้านเลขที่" required placeholder="เลขที่" class="w-full px-3 py-2 border rounded-md"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">หมู่ที่ <span class="text-red-500">*</span></label><input type="text" name="หมู่" required placeholder="หมู่" class="w-full px-3 py-2 border rounded-md"></div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ตำบล <span class="text-red-500">*</span></label>
+                            <select name="ตำบล" required class="w-full px-3 py-2 border rounded-md bg-white"><option value="" disabled selected>เลือกตำบล</option><option value="บ้านจีต">บ้านจีต</option><option value="โนนทองอินทร์">โนนทองอินทร์</option><option value="คอนสาย">คอนสาย</option><option value="ค้อใหญ่">ค้อใหญ่</option></select>
+                        </div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์ <span class="text-red-500">*</span></label><input type="tel" name="เบอร์โทรศัพท์" required placeholder="08X-XXX-XXXX" class="w-full px-3 py-2 border rounded-md"></div>
+                    </div>
+                </div>
+
+                <!-- แบบประเมิน DSPM -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-blue-50 border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h2 class="text-lg font-bold text-blue-800 flex items-center"><i data-lucide="check-square" class="w-5 h-5 mr-2"></i> แบบประเมิน DSPM</h2>
+                        <div class="flex items-center space-x-2">
+                            <label class="text-sm font-medium text-gray-700 whitespace-nowrap">เลือกช่วงอายุ:</label>
+                            <select id="ageSelector" name="ช่วงอายุที่ประเมิน" required onchange="renderAssessment()" class="px-3 py-1.5 border border-blue-300 rounded-md text-blue-800 font-semibold bg-white shadow-sm w-full sm:w-auto">
+                                <option value="" disabled selected>-- เลือกช่วงอายุ --</option>
+                                <option value="9">9 เดือน</option><option value="18">18 เดือน (1 ปี 6 เดือน)</option>
+                                <option value="30">30 เดือน (2 ปี 6 เดือน)</option><option value="42">42 เดือน (3 ปี 6 เดือน)</option><option value="60">60 เดือน (5 ปี)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div id="selectAgePrompt" class="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300"><p class="text-gray-600 font-medium">กรุณาเลือก "ช่วงอายุที่ประเมิน" ที่มุมขวาบน เพื่อแสดงรายการคำถาม</p></div>
+                        <div id="assessmentContainer" class="hidden"></div>
+                    </div>
+                </div>
+
+                <!-- สรุปผล และนัดหมาย -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-blue-50 border-b border-gray-200 px-6 py-4"><h2 class="text-lg font-bold text-blue-800 flex items-center"><i data-lucide="clipboard-check" class="w-5 h-5 mr-2"></i> สรุปผล และนัดหมาย</h2></div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2 bg-gray-50 p-5 rounded-lg border border-gray-200">
+                            <label class="block text-base font-bold text-gray-800 mb-3">สรุปผลการตรวจพัฒนาการ <span class="text-red-500">*</span></label>
+                            <div class="flex flex-col md:flex-row gap-4">
+                                <label class="inline-flex items-start p-3 border rounded-lg bg-white cursor-pointer hover:bg-green-50 flex-1 shadow-sm">
+                                    <input type="radio" name="สรุปผลตรวจพัฒนาการ" value="สมวัย" required onclick="toggleDelayedDomains(false); toggleReferral(false)" class="w-5 h-5 mt-0.5 text-green-600 border-gray-300 focus:ring-green-500">
+                                    <span class="ml-3 font-medium text-green-700 block">สมวัย<br><span class="text-xs text-green-600 font-normal">(พัฒนาการปกติ)</span></span>
+                                </label>
+                                <label class="inline-flex items-start p-3 border rounded-lg bg-white cursor-pointer hover:bg-red-50 flex-1 shadow-sm">
+                                    <input type="radio" name="สรุปผลตรวจพัฒนาการ" value="สงสัยล่าช้า ต้องติดตามพัฒนาการ 1 เดือน" required onclick="toggleDelayedDomains(true); toggleReferral(false)" class="w-5 h-5 mt-0.5 text-red-600 border-gray-300 focus:ring-red-500">
+                                    <span class="ml-3 font-medium text-red-700 block">สงสัยล่าช้า<br><span class="text-xs text-red-600 font-normal">(ต้องติดตาม 1 เดือน)</span></span>
+                                </label>
+                                <label class="inline-flex items-start p-3 border rounded-lg bg-white cursor-pointer hover:bg-orange-50 flex-1 shadow-sm">
+                                    <input type="radio" name="สรุปผลตรวจพัฒนาการ" value="สงสัยล่าช้าส่งต่อทันที" required onclick="toggleDelayedDomains(true); toggleReferral(true)" class="w-5 h-5 mt-0.5 text-orange-600 border-gray-300 focus:ring-orange-500">
+                                    <span class="ml-3 font-medium text-orange-700 block">สงสัยล่าช้า<br><span class="text-xs text-orange-600 font-normal">(ส่งต่อทันที)</span></span>
+                                </label>
+                            </div>
+
+                            <!-- ส่วนระบุสถานที่ส่งต่อ -->
+                            <div id="referralSection" class="mt-4 p-4 bg-orange-50 border border-orange-100 rounded-lg hidden">
+                                <label class="block text-sm font-bold text-orange-700 mb-2">ระบุสถานที่ส่งต่อ <span class="text-red-500">*</span></label>
+                                <input type="text" id="referralPlaceInput" name="สถานที่ส่งต่อ" placeholder="ระบุสถานที่ส่งต่อ.........." class="w-full px-3 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                            </div>
+
+                            <!-- ส่วนระบุด้านที่สงสัยล่าช้า -->
+                            <div id="delayedDomainsSection" class="mt-4 p-4 bg-red-50 border border-red-100 rounded-lg hidden">
+                                <p class="text-sm font-bold text-red-700 mb-3 flex items-center"><i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i> โปรดระบุด้านที่สงสัยล่าช้า (เลือกได้มากกว่า 1 ข้อ):</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" name="ด้านสงสัย_GM" value="ใช่" class="w-4 h-4 rounded text-red-600"><span>1. ด้านการเคลื่อนไหว (GM)</span></label>
+                                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" name="ด้านสงสัย_FM" value="ใช่" class="w-4 h-4 rounded text-red-600"><span>2. ด้านกล้ามเนื้อมัดเล็ก/สติปัญญา (FM)</span></label>
+                                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" name="ด้านสงสัย_RL" value="ใช่" class="w-4 h-4 rounded text-red-600"><span>3. ด้านการเข้าใจภาษา (RL)</span></label>
+                                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" name="ด้านสงสัย_EL" value="ใช่" class="w-4 h-4 rounded text-red-600"><span>4. ด้านการใช้ภาษา (EL)</span></label>
+                                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" name="ด้านสงสัย_PS" value="ใช่" class="w-4 h-4 rounded text-red-600"><span>5. ด้านการช่วยเหลือตัวเอง/สังคม (PS)</span></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2"><label class="block text-sm font-medium text-gray-700 mb-1">นัดหมายครั้งต่อไป (ลงวันที่)</label><input type="text" id="nextDateInput" name="นัดหมายครั้งต่อไป" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"></div>
+                        <div class="mt-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">วัตถุประสงค์การนัดหมาย</label>
+                            <select name="วัตถุประสงค์การนัดหมาย" onchange="toggleOtherPurpose(this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
+                                <option value="" selected>-- เลือกวัตถุประสงค์ --</option>
+                                <option value="นัดประเมินพัฒนาการตามช่วงวัย">นัดประเมินพัฒนาการตามช่วงวัย</option>
+                                <option value="นัดกระตุ้นพัฒนาการที่สงสัยล่าช้า">นัดกระตุ้นพัฒนาการที่สงสัยล่าช้า</option>
+                                <option value="อื่นๆ">อื่นๆ ระบุ</option>
+                            </select>
+                        </div>
+                        <div id="otherPurposeSection" class="md:col-span-2 hidden"><label class="block text-sm font-medium text-gray-700 mb-1">ระบุวัตถุประสงค์อื่นๆ</label><input type="text" name="วัตถุประสงค์อื่นๆ_ระบุ" class="w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                    </div>
+                    <div class="bg-gray-50 px-6 py-4 flex justify-end">
+                        <button type="submit" id="submitBtn" class="flex items-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 transition-colors">
+                            <i data-lucide="save" class="w-5 h-5 mr-2"></i> บันทึกข้อมูล
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </main>
+
+    <script>
+        // ใช้ตัวแปรระดับโกลบอลเพื่อเก็บ Cache ข้อมูล
+        let allServerData = []; 
+        let isDataLoaded = false;
+
+        const domains = {
+            "GM": "🏃‍♂️ ด้านการเคลื่อนไหว Gross Motor (GM)", "FM": "🧩 ด้านการใช้กล้ามเนื้อมัดเล็ก/สติปัญญา Fine Motor (FM)",
+            "RL": "👂 ด้านการเข้าใจภาษา Receptive Language (RL)", "EL": "💬 ด้านการใช้ภาษา Expressive Language (EL)",
+            "PS": "🤝 ด้านการช่วยเหลือตัวเองและสังคม Personal and Social (PS)"
+        };
+
+        const dspmData = {
+            "9": [
+                { id: "27", domain: "GM", text: "🧘‍♂️ 27. ลุกนั่งได้จากท่านอน" }, 
+                { id: "28", domain: "GM", text: "🚼 28. ยืนอยู่ได้โดยใช้มือเกาะเครื่องเรือนระดับอก" },
+                { id: "29", domain: "FM", text: "🪵 29. หยิบก้อนไม้จากพื้นและถือไว้มือละชิ้น" }, 
+                { id: "30", domain: "FM", text: "🤏 30. ใช้นิ้วหัวแม่มือและนิ้วอื่นๆหยิบของขึ้นจากพื้น" },
+                { id: "31", domain: "RL", text: "🙋‍♂️ 31. ทำตามคำสั่งง่ายๆเมื่อใช้ท่าทางประกอบ" }, 
+                { id: "32", domain: "EL", text: "🙅‍♂️ 32. เด็กรู้จักปฏิเสธด้วยการแสดงท่าทาง" },
+                { id: "33", domain: "EL", text: "🗣️ 33. เลียนเสียงคำพูดที่คุ้นเคยได้อย่างน้อย 1 เสียง เช่น หม่ำ จ๊ะ" }, 
+                { id: "34", domain: "PS", text: "🍗 34. ใช้นิ้วหยิบอาหารกินได้" }
+            ],
+            "18": [
+                { id: "50", domain: "GM", text: "🏃 50. วิ่งได้" }, 
+                { id: "51", domain: "GM", text: "⚽ 51. เดินถือลูกบอลไปได้ไกล 3 เมตร" },
+                { id: "52", domain: "FM", text: "📖 52. เปิดหน้าหนังสือที่ทำด้วยกระดาษแข็งทีละแผ่นได้เอง" }, 
+                { id: "53", domain: "FM", text: "🧱 53. ต่อก้อนไม้ 2 ชั้น" },
+                { id: "54", domain: "RL", text: "🧸 54. เลือกวัตถุตามคำสั่งได้ถูกต้อง 3 ชนิด" }, 
+                { id: "55", domain: "RL", text: "👆 55. ชี้อวัยวะได้ 1 ส่วน" },
+                { id: "56", domain: "EL", text: "🦜 56. พูดเลียนคำที่เด่นหรือคำสุดท้ายของคำพูด" }, 
+                { id: "57", domain: "EL", text: "👋 57. พูดเป็นคำๆได้ 4 คำเรียกชื่อสิ่งของหรือทักทาย (เป็นคำอื่นที่ไม่ใช่พ่อแม่ ชื่อของคนคุ้นเคยในบ้านหรือชื่อของสัตว์เลี้ยงในบ้าน)" },
+                { id: "58", domain: "PS", text: "👀 58. สนใจ/มองตาสิ่งที่ผู้ใหญ่ชี้ที่อยู่ไกลออกไปอย่างน้อย 3 เมตร" }, 
+                { id: "59", domain: "PS", text: "🥛 59. ดื่มน้ำจากแก้วและวางคืนที่เดิมได้เองโดยไม่หก" }
+            ],
+            "30": [
+                { id: "70", domain: "GM", text: "🦘 70. กระโดดข้ามเชือกบนพื้นไปข้างหน้าได้" }, 
+                { id: "71", domain: "GM", text: "⚾ 71. ขว้างลูกบอลขนาดเล็กได้โดยยกมือขึ้นเหนือศีรษะ" },
+                { id: "72", domain: "FM", text: "🗼 72. ต่อก้อนไม้ สี่เหลี่ยม ลูกบาศก์เป็นหอสูงได้ 8 ก้อน" }, 
+                { id: "73", domain: "FM", text: "🤲 73. ยื่นวัตถุให้ผู้ทดสอบได้ 1 ชิ้นตามคำสั่ง" },
+                { id: "74", domain: "RL", text: "📚 74. สนใจฟังนิทานได้นาน 5 นาที" }, 
+                { id: "75", domain: "RL", text: "📦 75. วางวัตถุไว้ ข้างบน และ ข้างใต้ ตามคำสั่งได้" },
+                { id: "76", domain: "EL", text: "💬 76. พูดติดต่อกัน 2 คำอย่างมีความหมายโดยใช้คำกริยาได้ถูกต้องอย่างน้อย 4 กริยา" }, 
+                { id: "77", domain: "PS", text: "🎵 77. ร้องเพลงได้บางคำหรือร้องเพลงคลอตามทำนอง" },
+                { id: "78", domain: "PS", text: "⏳ 78. เด็กรู้จักรอให้ถึงรอบของตนเองในการเล่นโดยมีผู้ใหญ่คอยบอก" }
+            ],
+            "42": [
+                { id: "90", domain: "GM", text: "🦩 90. ยืนขาเดียว 5 วินาที" }, 
+                { id: "91", domain: "GM", text: "👐 91. ใช้แขนรับลูกบอลได้" },
+                { id: "92", domain: "FM", text: "🔺 92. แยกรูปทรงเรขาคณิตได้ 3 แบบ" }, 
+                { id: "93", domain: "FM", text: "🧩 93. ประกอบชิ้นส่วนของรูปภาพที่ถูกตัดออกเป็น 3 ชิ้นได้" },
+                { id: "94", domain: "FM", text: "✏️ 94. เขียนรูปวงกลมตามแบบได้" },
+                { id: "95", domain: "RL", text: "🔄 95. วางวัตถุไว้ข้างหน้าและข้างหลังได้ตามคำสั่ง" }, 
+                { id: "96", domain: "RL", text: "👕 96. เลือกจัดกลุ่มวัตถุตามประเภทภาพเสื้อผ้าได้" },
+                { id: "97", domain: "EL", text: "🕰️ 97. พูดถึงเหตุการณ์ที่เพิ่งผ่านไปใหม่ๆ ได้" }, 
+                { id: "98", domain: "EL", text: "🙏 98. พูด “ขอ”หรือ “ขอบคุณ”หรือ “ให้” ได้เอง" },
+                { id: "99", domain: "PS", text: "👦👧 99. บอกเพศของตนเองได้ถูกต้อง" }, 
+                { id: "100", domain: "PS", text: "🧥 100. ใส่เสื้อผ้าหนาได้เองโดยไม่ต้องติดกระดุม" }
+            ],
+            "60": [
+                { id: "117", domain: "GM", text: "👣 117. เดินต่อเท้าเป็นเส้นตรงไปข้างหน้าได้" }, 
+                { id: "118", domain: "FM", text: "🔲 118. ลอกรูป 🔲" },
+                { id: "119", domain: "FM", text: "👤 119. วาดรูปคนได้ 6 ส่วน" }, 
+                { id: "120", domain: "RL", text: "🧠 120. จับใจความเมื่อฟังนิทานหรือเรื่องเล่า" },
+                { id: "121", domain: "RL", text: "🔢 121. นับก้อนไม้ 5 ก้อน (รู้จำนวนเท่ากับ 5)" }, 
+                { id: "122", domain: "EL", text: "🇹🇭 122. อ่านออกเสียงพยัญชนะได้ถูกต้อง 5 ตัว ดังนี้ ก ง ด น ย" },
+                { id: "123", domain: "EL", text: "💡 123. รู้จักพูดอย่างมีเหตุผล" }, 
+                { id: "124", domain: "PS", text: "❤️ 124. แสดงความเห็นอกเห็นใจเมื่อเห็นเพื่อนเจ็บหรือไม่สบาย" }
+            ]
+        };
+
+        lucide.createIcons();
+        let evalDatepicker, nextDatepicker;
+
+        function toggleDelayedDomains(show) {
+            const section = document.getElementById('delayedDomainsSection');
+            if (show) section.classList.remove('hidden');
+            else {
+                section.classList.add('hidden');
+                section.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            }
+        }
+        
+        function toggleReferral(show) {
+            const section = document.getElementById('referralSection');
+            if (show) {
+                section.classList.remove('hidden');
+                document.getElementById('referralPlaceInput').required = true;
+            } else {
+                section.classList.add('hidden');
+                document.getElementById('referralPlaceInput').required = false;
+                document.getElementById('referralPlaceInput').value = "";
+            }
+        }
+
+        function toggleOtherPurpose(value) {
+            const section = document.getElementById('otherPurposeSection');
+            if (value === "อื่นๆ") section.classList.remove('hidden');
+            else {
+                section.classList.add('hidden');
+                section.querySelector('input').value = "";
+            }
+        }
+
+        function navigate(viewName) {
+            document.getElementById('view-dashboard').style.display = viewName === 'dashboard' ? 'block' : 'none';
+            document.getElementById('view-form').style.display = viewName === 'form' ? 'block' : 'none';
+            document.getElementById('view-summary').style.display = viewName === 'summary' ? 'block' : 'none';
+            
+            const baseClass = "px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-200 flex items-center shadow-sm";
+            
+            const btnDashboard = document.getElementById('nav-dashboard');
+            const btnForm = document.getElementById('nav-form');
+            const btnSummary = document.getElementById('nav-summary');
+
+            if (btnDashboard) {
+                btnDashboard.className = `${baseClass} ${viewName === 'dashboard' ? 'bg-blue-900 text-white ring-2 ring-blue-300/50' : 'bg-blue-800/60 text-blue-100 hover:bg-blue-800'}`;
+            }
+            if (btnForm) {
+                btnForm.className = `${baseClass} ${viewName === 'form' ? 'bg-emerald-600 text-white ring-2 ring-emerald-300/50' : 'bg-emerald-500/90 text-emerald-50 hover:bg-emerald-500'}`;
+            }
+            if (btnSummary) {
+                btnSummary.className = `${baseClass} ${viewName === 'summary' ? 'bg-amber-600 text-white ring-2 ring-amber-300/50' : 'bg-amber-500/90 text-amber-50 hover:bg-amber-500'}`;
+                // โหลดข้อมูลอัตโนมัติเมื่อเข้าหน้ารายงานครั้งแรก
+                if(!isDataLoaded && viewName === 'summary') {
+                    fetchDataFromGoogleSheets(true);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            navigate('dashboard');
+            const flatpickrConfig = {
+                locale: "th", altInput: true, altFormat: "j F Y", dateFormat: "Y-m-d",
+                formatDate: function (date, format, locale) {
+                    if (format === "Y-m-d") {
+                        const y = date.getFullYear();
+                        const m = String(date.getMonth() + 1).padStart(2, '0');
+                        const d = String(date.getDate()).padStart(2, '0');
+                        return `${y}-${m}-${d}`;
+                    }
+                    const year = date.getFullYear() + 543;
+                    return `${date.getDate()} ${locale.months.longhand[date.getMonth()]} ${year}`;
+                },
+                onReady: function(sd, ds, instance) {
+                    if(instance.currentYearElement) instance.currentYearElement.value = instance.currentYear + 543;
+                }
+            };
+
+            evalDatepicker = flatpickr("#evalDateInput", { ...flatpickrConfig, defaultDate: new Date() });
+            nextDatepicker = flatpickr("#nextDateInput", flatpickrConfig);
+            document.getElementById('filterYear').value = new Date().getFullYear() + 543;
+            document.getElementById('filterMonth').value = String(new Date().getMonth() + 1).padStart(2, '0');
+        });
+
+        // 🚀 ปรับปรุงสถาปัตยกรรม 1: แยกฟังก์ชันซิงค์ข้อมูลกับฟังก์ชันกรองข้อมูลออกจากกัน
+        async function fetchDataFromGoogleSheets(forceSync = false) {
+            const btn = document.getElementById('btnSyncData');
+            if(btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> กำลังโหลด...';
+                lucide.createIcons();
+            }
+            
+            try {
+                // ดึงข้อมูลใหม่
+                const response = await fetch(GAS_URL, { redirect: "follow" });
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    allServerData = result.data; 
+                    isDataLoaded = true;
+                    applyFiltersAndRender(); // ทำการกรองและเรนเดอร์ในเครื่อง
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'ซิงค์ข้อมูลสำเร็จ', showConfirmButton: false, timer: 1500 });
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
+            } finally {
+                if(btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> ซิงค์ข้อมูลล่าสุด';
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        // 🚀 ปรับปรุงสถาปัตยกรรม 2: Batch Rendering ทำงานเสร็จในเสี้ยววินาที
+        function applyFiltersAndRender() {
+            if (!isDataLoaded) return; // ป้องกันการรันถ้าข้อมูลยังไม่มา
+
+            const filterYear = document.getElementById('filterYear').value;
+            const filterMonth = document.getElementById('filterMonth').value;
+            const filterHospital = document.getElementById('filterHospital').value;
+
+            // กรองข้อมูลในเครื่อง (Local Memory)
+            let filteredData = allServerData.filter(row => {
+                const dateVal = row['วันที่ประเมิน'];
+                let matchYear = true; let matchMonth = true; let matchHosp = true;
+                
+                if (dateVal) {
+                    const d = new Date(dateVal);
+                    if (!isNaN(d.getTime())) { // Is valid date
+                        const y = d.getFullYear();
+                        const m = String(d.getMonth() + 1).padStart(2, '0');
+                        if (filterYear) matchYear = ((y + 543).toString() === filterYear);
+                        if (filterMonth !== "all") matchMonth = (m === filterMonth);
+                    } else {
+                        // Fallback string handling
+                        const parts = String(dateVal).split('T')[0].split('-');
+                        if (parts.length === 3) {
+                            if (filterYear) matchYear = ((parseInt(parts[0]) + 543).toString() === filterYear);
+                            if (filterMonth !== "all") matchMonth = (parts[1] === filterMonth);
+                        }
+                    }
+                } else {
+                    if(filterYear || filterMonth !== 'all') matchYear = false;
+                }
+                if (filterHospital !== "all") matchHosp = (row['รพ.สต.'] === filterHospital);
+                return matchYear && matchMonth && matchHosp;
+            });
+
+            // อัปเดตตัวเลขสถิติ
+            document.getElementById('statTotal').innerText = filteredData.length;
+            document.getElementById('statNormal').innerText = filteredData.filter(r => r['สรุปผลตรวจพัฒนาการ'] === 'สมวัย').length;
+            document.getElementById('statDelay').innerText = filteredData.filter(r => r['สรุปผลตรวจพัฒนาการ'] && r['สรุปผลตรวจพัฒนาการ'].includes('สงสัยล่าช้า')).length;
+
+            const tbody = document.getElementById('tableBody');
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-gray-500"><i data-lucide="inbox" class="w-12 h-12 text-gray-300 mx-auto mb-3"></i><p class="font-medium">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</p></td></tr>`;
+                lucide.createIcons();
+                return;
+            }
+
+            const sortedData = [...filteredData].reverse(); 
+            const monthsTh = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            
+            // สร้าง HTML String รวมกันก่อนแล้วค่อยวาดทีเดียว (เร็วกว่า createElement ทีละบรรทัดมาก)
+            let htmlRows = '';
+            
+            for (let i = 0; i < sortedData.length; i++) {
+                const row = sortedData[i];
+                
+                // --- จัดการวันที่ประเมิน ---
+                let displayDate = row['วันที่ประเมิน'] || '-';
+                if (displayDate !== '-') {
+                    const d = new Date(displayDate);
+                    if (!isNaN(d.getTime())) {
+                        displayDate = `${d.getDate()} ${monthsTh[d.getMonth() + 1]} ${d.getFullYear() + 543}`;
+                    } else {
+                        const dateParts = String(displayDate).split('T')[0].split('-');
+                        if (dateParts.length === 3) {
+                            displayDate = `${parseInt(dateParts[2])} ${monthsTh[parseInt(dateParts[1])]} ${parseInt(dateParts[0]) + 543}`;
+                        }
+                    }
+                }
+
+                // --- จัดการวันที่บันทึกระบบ (Timestamp) ---
+                let timestampDate = row['Timestamp'] || '-';
+                if (timestampDate !== '-') {
+                    const tD = new Date(timestampDate);
+                    if (!isNaN(tD.getTime())) {
+                        timestampDate = `${String(tD.getDate()).padStart(2, '0')}/${String(tD.getMonth() + 1).padStart(2, '0')}/${tD.getFullYear() + 543} ${String(tD.getHours()).padStart(2, '0')}:${String(tD.getMinutes()).padStart(2, '0')} น.`;
+                    }
+                }
+
+                const name = `${row['คำนำหน้า'] || ''}${row['ชื่อ'] || ''} ${row['นามสกุล'] || ''}`;
+                const age = row['ช่วงอายุที่ประเมิน'] ? `${row['ช่วงอายุที่ประเมิน']} เดือน` : '-';
+                const hosp = row['รพ.สต.'] || '-';
+                const result = row['สรุปผลตรวจพัฒนาการ'] || '-';
+                
+                let resultBadge = result === 'สมวัย' ? '<span class="px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800">สมวัย</span>' : 
+                                  result.includes('ส่งต่อ') ? '<span class="px-2 py-1 text-xs font-bold rounded-full bg-orange-100 text-orange-800">สงสัยล่าช้า (ส่งต่อ)</span>' : 
+                                  result.includes('สงสัยล่าช้า') ? '<span class="px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">สงสัยล่าช้า</span>' : 
+                                  `<span class="px-2 py-1 text-xs font-bold rounded-full bg-gray-100 text-gray-800">${result}</span>`;
+
+                htmlRows += `
+                    <tr class="hover:bg-gray-50 border-b border-gray-100">
+                        <td class="px-6 py-3 whitespace-nowrap text-xs text-gray-500">${timestampDate}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900">${displayDate}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${name}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-center">${age}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">${hosp}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-center">${resultBadge}</td>
+                    </tr>
+                `;
+            }
+            
+            tbody.innerHTML = htmlRows;
+        }
+
+        // ฟังก์ชันดาวน์โหลดเป็นไฟล์ Excel
+        function exportToExcel() {
+            if (!allServerData || allServerData.length === 0) {
+                Swal.fire('ไม่มีข้อมูล', 'กรุณากดซิงค์ข้อมูลก่อนทำการส่งออก', 'warning');
+                return;
+            }
+
+            const filterYear = document.getElementById('filterYear').value;
+            const filterMonth = document.getElementById('filterMonth').value;
+            const filterHospital = document.getElementById('filterHospital').value;
+
+            let filteredData = allServerData.filter(row => {
+                const dateVal = row['วันที่ประเมิน'];
+                let matchYear = true; let matchMonth = true; let matchHosp = true;
+                
+                if (dateVal) {
+                    const d = new Date(dateVal);
+                    if (!isNaN(d.getTime())) {
+                        const y = d.getFullYear();
+                        const m = String(d.getMonth() + 1).padStart(2, '0');
+                        if (filterYear) matchYear = ((y + 543).toString() === filterYear);
+                        if (filterMonth !== "all") matchMonth = (m === filterMonth);
+                    } else {
+                        const parts = String(dateVal).split('T')[0].split('-');
+                        if (parts.length === 3) {
+                            if (filterYear) matchYear = ((parseInt(parts[0]) + 543).toString() === filterYear);
+                            if (filterMonth !== "all") matchMonth = (parts[1] === filterMonth);
+                        }
+                    }
+                } else {
+                    if(filterYear || filterMonth !== 'all') matchYear = false;
+                }
+                if (filterHospital !== "all") matchHosp = (row['รพ.สต.'] === filterHospital);
+                return matchYear && matchMonth && matchHosp;
+            });
+
+            if (filteredData.length === 0) {
+                Swal.fire('ไม่มีข้อมูล', 'ไม่มีข้อมูลที่ตรงกับเงื่อนไขสำหรับส่งออกเป็น Excel', 'warning');
+                return;
+            }
+
+            // Map and format dates correctly before exporting
+            const exportData = filteredData.map(row => {
+                const newRow = { ...row };
+                if (newRow['วันที่ประเมิน']) {
+                    const d = new Date(newRow['วันที่ประเมิน']);
+                    if (!isNaN(d.getTime())) {
+                        newRow['วันที่ประเมิน'] = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear() + 543}`;
+                    }
+                }
+                if (newRow['นัดหมายครั้งต่อไป']) {
+                    const d = new Date(newRow['นัดหมายครั้งต่อไป']);
+                    if (!isNaN(d.getTime())) {
+                        newRow['นัดหมายครั้งต่อไป'] = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear() + 543}`;
+                    }
+                }
+                if (newRow['Timestamp']) {
+                    const d = new Date(newRow['Timestamp']);
+                    if (!isNaN(d.getTime())) {
+                        newRow['Timestamp'] = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear() + 543} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    }
+                }
+                return newRow;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ข้อมูล DSPM");
+            
+            const timestamp = new Date().toISOString().slice(0,10);
+            XLSX.writeFile(wb, `รายงานDSPM_${timestamp}.xlsx`);
+        }
+
+        function renderAssessment() {
+            const age = document.getElementById('ageSelector').value;
+            const container = document.getElementById('assessmentContainer');
+            const prompt = document.getElementById('selectAgePrompt');
+            if(!age) return;
+            prompt.style.display = 'none';
+            container.style.display = 'block';
+            
+            const items = dspmData[age];
+            const grouped = {};
+            items.forEach(it => { if(!grouped[it.domain]) grouped[it.domain] = []; grouped[it.domain].push(it); });
+            
+            let fullHtml = '';
+            for(const [dom, itms] of Object.entries(grouped)) {
+                let html = `<div class="mb-6 bg-gray-50 rounded-lg p-4 border border-gray-200"><h3 class="font-bold text-gray-800 mb-4 border-b pb-2 text-blue-700">${domains[dom]}</h3><div class="space-y-3">`;
+                
+                for(let i=0; i<itms.length; i++) {
+                    const it = itms[i];
+                    html += `
+                    <div class="flex flex-col bg-white p-3 rounded shadow-sm border border-gray-100 gap-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <span class="text-sm font-medium text-gray-700 flex-1">${it.text}</span>
+                            <div class="flex space-x-4 min-w-[150px] justify-start sm:justify-end">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="ข้อ_${it.id}" value="ผ่าน" class="w-4 h-4 text-green-600" required>
+                                    <span class="ml-2 text-sm">ผ่าน</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="ข้อ_${it.id}" value="ไม่ผ่าน" class="w-4 h-4 text-red-600">
+                                    <span class="ml-2 text-sm">ไม่ผ่าน</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                html += `</div></div>`;
+                fullHtml += html;
+            }
+            container.innerHTML = fullHtml;
+            lucide.createIcons(); // โหลดไอคอนใหม่
+        }
+
+        document.getElementById('dspmForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const form = e.target;
+            const data = Object.fromEntries(new FormData(form).entries());
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i> กำลังบันทึก...';
+            lucide.createIcons();
+
+            try {
+                // 🚀 ปรับปรุงสถาปัตยกรรม 3: ใช้ text/plain ส่งแบบไม่เกิด CORS Preflight (ลดเวลา Network)
+                const res = await fetch(GAS_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                    body: JSON.stringify(data),
+                    redirect: 'follow'
+                });
+                
+                const result = await res.json();
+                
+                if(result.status === "success") {
+                    Swal.fire({ title: 'สำเร็จ!', text: 'บันทึกข้อมูลเรียบร้อยแล้ว', icon: 'success', timer: 1500, showConfirmButton: false }).then(() => {
+                        form.reset();
+                        evalDatepicker.setDate(new Date());
+                        nextDatepicker.clear();
+                        toggleDelayedDomains(false);
+                        toggleReferral(false);
+                        toggleOtherPurpose("");
+
+                        document.getElementById('assessmentContainer').style.display = 'none';
+                        document.getElementById('selectAgePrompt').style.display = 'block';
+                        
+                        // เคลียร์สถานะ Cache เพื่อให้กดซิงค์ข้อมูลใหม่เวลาเปิดหน้ารายงาน
+                        isDataLoaded = false;
+                        
+                        navigate('dashboard');
+                    });
+                } else { throw new Error(result.message); }
+            } catch (err) {
+                Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถบันทึกได้ โปรดตรวจสอบสัญญาณอินเทอร์เน็ต', icon: 'error' });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="save" class="w-5 h-5 mr-2"></i> บันทึกข้อมูล';
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
