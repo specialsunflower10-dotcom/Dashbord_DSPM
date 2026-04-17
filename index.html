@@ -217,12 +217,12 @@
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">วันที่บันทึกระบบ</th>
                                     <th scope="col" class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">วันที่ประเมิน</th>
                                     <th scope="col" class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">ชื่อ-สกุล เด็ก</th>
                                     <th scope="col" class="px-6 py-3 text-center font-bold text-gray-500 uppercase tracking-wider">ช่วงอายุ</th>
                                     <th scope="col" class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">รพ.สต.</th>
                                     <th scope="col" class="px-6 py-3 text-center font-bold text-gray-500 uppercase tracking-wider">ผลประเมิน</th>
+                                    <th scope="col" class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">วันนัดครั้งต่อไป</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
@@ -611,20 +611,25 @@
                     }
                 }
 
-                // --- จัดการวันที่บันทึกระบบ (Timestamp) ---
-                let timestampDate = row['Timestamp'] || '-';
-                if (timestampDate !== '-') {
-                    const tD = new Date(timestampDate);
-                    if (!isNaN(tD.getTime())) {
-                        timestampDate = `${String(tD.getDate()).padStart(2, '0')}/${String(tD.getMonth() + 1).padStart(2, '0')}/${tD.getFullYear() + 543} ${String(tD.getHours()).padStart(2, '0')}:${String(tD.getMinutes()).padStart(2, '0')} น.`;
-                    }
-                }
-
                 const name = `${row['คำนำหน้า'] || ''}${row['ชื่อ'] || ''} ${row['นามสกุล'] || ''}`;
                 const age = row['ช่วงอายุที่ประเมิน'] ? `${row['ช่วงอายุที่ประเมิน']} เดือน` : '-';
                 const hosp = row['รพ.สต.'] || '-';
                 const result = row['สรุปผลตรวจพัฒนาการ'] || '-';
                 
+                // --- จัดการวันที่นัดหมายครั้งต่อไป ---
+                let nextDate = row['นัดหมายครั้งต่อไป'] || '-';
+                if (nextDate !== '-' && nextDate !== '') {
+                    const nd = new Date(nextDate);
+                    if (!isNaN(nd.getTime())) {
+                        nextDate = `${nd.getDate()} ${monthsTh[nd.getMonth() + 1]} ${nd.getFullYear() + 543}`;
+                    } else {
+                        const ndParts = String(nextDate).split('T')[0].split('-');
+                        if (ndParts.length === 3) {
+                            nextDate = `${parseInt(ndParts[2])} ${monthsTh[parseInt(ndParts[1])]} ${parseInt(ndParts[0]) + 543}`;
+                        }
+                    }
+                }
+
                 let resultBadge = result === 'สมวัย' ? '<span class="px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800">สมวัย</span>' : 
                                   result.includes('ส่งต่อ') ? '<span class="px-2 py-1 text-xs font-bold rounded-full bg-orange-100 text-orange-800">สงสัยล่าช้า (ส่งต่อ)</span>' : 
                                   result.includes('สงสัยล่าช้า') ? '<span class="px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">สงสัยล่าช้า</span>' : 
@@ -632,12 +637,12 @@
 
                 htmlRows += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td class="px-6 py-3 whitespace-nowrap text-xs text-gray-500">${timestampDate}</td>
                         <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900">${displayDate}</td>
                         <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${name}</td>
                         <td class="px-6 py-3 whitespace-nowrap text-sm text-center">${age}</td>
                         <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">${hosp}</td>
                         <td class="px-6 py-3 whitespace-nowrap text-center">${resultBadge}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-blue-600 font-medium">${nextDate}</td>
                     </tr>
                 `;
             }
